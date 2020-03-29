@@ -19,14 +19,31 @@
     <title>K6Khabar</title>
   </head>
   <body>
-    <h1 style="float:inline-start">
+    <h1 style="float:inline-start; font-family:lato">
       K6Khabar.com
+      {%if request.user.is_authenticated %}
+      <a href="{% url 'logout' %}">
+        <button type="button" class="btn btn-primary" style="float: right;margin-left:10px ">
+          Logout
+        </button>
+      </a>
 
-      <a href="{% url 'login' %}"
-        ><button type="button" class="btn btn-primary" style="float: right;">
+      {%else%}
+    
+
+      <a href="{% url 'login' %}">
+        <button type="button" class="btn btn-primary" style="float: right;margin-left:10px ">
           Login
-        </button></a
-      >
+        </button>
+      </a>
+      <a href="{% url 'register' %}">
+        <button type="button" class="btn btn-primary" style="float: right;; ">
+          Register
+        </button>
+      </a>
+      {%endif%}
+      <small style="font-size: 15px; color:brown">Welcome {{user}}! </small>
+      
     </h1>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -45,7 +62,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           {% for category in categories %}
-          <li class="nav-item">
+          <li class="nav-item{%if current_category_id == category.id %} active {%endif%}"">
             <a class="nav-link" href="{% url 'topic' category.id %}">
               {{category.name}}
             </a>
@@ -53,20 +70,30 @@
           {% endfor %}
         </ul>
       </div>
-      <form class="form-inline">
+      <form  method='GET' Action="{%url 'search' %}"class="form-inline">
         <input
+          name="query"
           class="form-control mr-sm-2"
           type="search"
           placeholder="Search"
-          aria-label="Search"
-        />
+          aria-label="Search"/>
         <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
           Search
         </button>
       </form>
+      {%if request.user.is_authenticated%}
+      <a href="{% url 'add_post' %}">
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit" >
+        Add Post
+        </button></a>
+      {%endif%}
     </nav>
 
-    {% block main_content %} {% endblock %}
+   <div class="ml-4"> {% block main_content %} {% endblock %}</div>
+
+   <footer class="page-footer font-small blue pt-4">
+     <p style="text-align:center; background-color:black;height:50px;width:100%;float:left;color:white">Copyright:2022,K6Khabar.com</p>
+   </footer>
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
