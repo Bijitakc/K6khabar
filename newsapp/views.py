@@ -3,14 +3,14 @@ import datetime
 from django.contrib.auth.decorators import login_required
 import random
 
-from .models import PostModel, CategoryModel
-
+from .models import PostModel, CategoryModel,CommentModel
 from userapp.models import UserModel
 from django.contrib.auth.models import User
 
-from .forms import AddPostForm
+from .forms import AddPostForm,AddCommentForm
 
 from django.contrib.auth.decorators import login_required
+
 
 
 def get_featured_post(posts):
@@ -137,6 +137,52 @@ def search_view(request):
         'search_query':query
     }
     return render(request,'newsapp/search_results.html',context)
+
+@login_required
+def add_comment_view(request,id):
+    if request.method=='POST':
+        form=AddCommentForm(request.POST,request.FILES)
+        post=PostModel.objects.filter(id=id).first()
+        if form.is_valid():
+            #now add logic to add the form
+            comment=form.save(commit=False)
+            django_user=User.objects.filter(id=request.user.id).first()
+            current_user=UserModel.objects.filter(auth=django_user).first()
+            comment.commented_by=current_user
+            comment.parent_post=PostModel.objects.filter(id=id).first()
+            comment.save()
+            return redirect('detail',post.id)
+        else:
+            #this means the form as errors
+            return render(request,'newsapp/add_comment.html',{'form':form})
+    else:
+        form=AddCommentForm()
+        
+        context={
+            'form':form
+        }
+        return render(request,'newsapp/add_comment.html',context)
+        
+
+@login_required
+def delete_comment_view(request,id):
+    post=PostModel.objects.filter(id=id).first()
+    comment=CommentModel.objects.filter(id=id).first()
+    if comment:
+        logged_in_user_id=request.user.id 
+        comment_user_id=comment.commented_by.auth.id
+        if logged_in_user_id==comment_user_id:
+            #to delete the post
+            comment.delete()
+            return redirect('detail',post.id)
+
+    else:
+        #theres no post with that id
+        return render(request,'newsapp/error404.html')
+        
+@login_required
+def edit_comment_view(request,id):
+    return render(request,'newsapp/error404.html')
 
             
         

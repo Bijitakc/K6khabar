@@ -15,8 +15,17 @@
 
     <br>
     <br>
-    <h2>Comments:</h2>
-    {% for comment in post.comments.all %}
+    <h2>Comments: 
+     
+        <a href="{% url 'add_comment' id=post.id%}">
+        <button class="btn btn-primary" style="float: right; margin-right:40px">Add a comment</button></a></h2>
+        {% for comment in post.comments.all %}
+        {%if comment.commented_by.auth.id == request.user.id %}
+        <a href="{% url 'delete_comment' id=comment.id%}">
+        <button class="btn btn-danger" style="float: right; margin-right:40px">Delete comment</button></a>
+        <a href="{% url 'edit_comment' id=comment.id%}">
+            <button  style="float: right; margin-right:40px; color:grey">Edit comment</button></a>
+            {%endif%}
         By: {{comment.commented_by}}<br>
         On: {{comment.commented_on}}<br>
         Comment: {{comment.content}}
