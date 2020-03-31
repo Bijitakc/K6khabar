@@ -14,23 +14,21 @@ from django.contrib.auth.decorators import login_required
 
 
 def get_featured_post(posts):
-    if len(posts)==o:
+    if len(posts)==0:
         return None
     else:
         num_of_posts=len(posts)
-        featured_post_index=random.randint(0,num_of_posts-1)
-        return posts[feature_post_index]
+        featured_post_index= random.randint(0,num_of_posts-1)
+        return posts[featured_post_index]
 
 
 def index(request):
     posts = PostModel.objects.all().order_by('posted_on','title','posted_by')[:10]
     categories = CategoryModel.objects.all()[:5]
-    num_of_posts=len(posts)
-    featured_post_index=random.randint(0,num_of_posts-1)
     context = {
         'posts' : posts,
         'categories': categories,
-        'featured_post': posts[featured_post_index] if len(posts) > 0 else None
+        'featured_post': get_featured_post(posts) if len(posts) > 0 else None
     }
     return render(request, 'newsapp/index.html', context)
 
@@ -166,7 +164,6 @@ def add_comment_view(request,id):
 
 @login_required
 def delete_comment_view(request,id):
-    post=PostModel.objects.filter(id=id).first()
     comment=CommentModel.objects.filter(id=id).first()
     if comment:
         logged_in_user_id=request.user.id 
@@ -174,7 +171,7 @@ def delete_comment_view(request,id):
         if logged_in_user_id==comment_user_id:
             #to delete the post
             comment.delete()
-            return redirect('detail',post.id)
+            return redirect('detail',comment.parent_post.id)
 
     else:
         #theres no post with that id
@@ -182,7 +179,31 @@ def delete_comment_view(request,id):
         
 @login_required
 def edit_comment_view(request,id):
-    return render(request,'newsapp/error404.html')
+    if request.method=='POST':
+            form=AddCommentForm(request.POST,request.FILES)
+            comment=CommentModel.objects.filter(id=id).first()
+            post = PostModel.objects.filter(id=id).first()
+            if comment:
+                current_user_id=request.user.id 
+                comment_user_id=comment.commented_by.auth.id
+                if current_user_id==comment_user_id:
+                    form=AddCommentForm(request.POST,files=request.FILES,instance=comment)
+                    if form.is_valid():
+                        form.save()
+                        return redirect('detail',comment.parent_post.id)
+                    else:
+                        return render(request,'newsapp/edit_comment.html',{'form':form})
+                else:
+                    return render(request,'newsapp/error404.html')
+            else:
+                 return render(request,'newsapp/error404.html')
+    else:
+            comment= CommentModel.objects.filter(id=id).first()
+            if comment:
+                form=AddCommentForm(instance=comment)
+                return render(request,'newsapp/edit_comment.html',{'form':form})
+            else:
+                return render(request,'newsapp/error404.html')
 
             
         

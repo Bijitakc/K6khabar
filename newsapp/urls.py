@@ -13,6 +13,6 @@ urlpatterns = [
     path('search/', search_view, name='search'),
     path('detail/<int:id>/add_comment/', add_comment_view, name='add_comment'),
     path('delete_comment/<int:id>/', delete_comment_view, name='delete_comment'),
-    path('detail/<int:id>/edit_comment/', edit_comment_view, name='edit_comment')
+    path('edit_comment/<int:id>/', edit_comment_view, name='edit_comment')
 ]
 
