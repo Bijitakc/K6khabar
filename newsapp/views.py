@@ -9,8 +9,6 @@ from django.contrib.auth.models import User
 
 from .forms import AddPostForm,AddCommentForm
 
-from django.contrib.auth.decorators import login_required
-
 
 
 def get_featured_post(posts):
