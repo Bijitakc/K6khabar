@@ -1,2 +1,2 @@
 # K6khabar
-A simple django news portal
+A simple django news portal website
